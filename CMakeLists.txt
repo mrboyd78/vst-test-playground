@@ -12,20 +12,35 @@ juce_add_plugin(VstTestPlayground
     NEEDS_MIDI_INPUT TRUE
     PLUGIN_MANUFACTURER_CODE "MrBd"
     PLUGIN_CODE "Vstp"
-    FORMATS VST3 AU
-    # Enable WebView2 and static linking as recommended
-    NEEDS_WEBVIEW2 TRUE
-    JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING TRUE
+    FORMATS VST3
 )
 
+target_compile_definitions(VstTestPlayground PRIVATE JUCE_VST3_CAN_REPLACE_VST2=0)
+
 target_sources(VstTestPlayground PRIVATE
-    Source/PluginProcessor.cpp
     Source/PluginProcessor.h
-    Source/PluginEditor.cpp
     Source/PluginEditor.h
+    Source/PluginProcessor.cpp
+    Source/PluginEditor.cpp
 )
 
 # Set C++ standard to 20 for modern features
 target_compile_features(VstTestPlayground PUBLIC cxx_std_20)
+
+target_link_libraries(VstTestPlayground
+    PRIVATE
+    juce::juce_audio_basics
+    juce::juce_audio_devices
+    juce::juce_audio_formats
+    juce::juce_audio_processors
+    juce::juce_audio_utils
+    juce::juce_core
+    juce::juce_data_structures
+    juce::juce_dsp
+    juce::juce_events
+    juce::juce_graphics
+    juce::juce_gui_basics
+    juce::juce_gui_extra
+)
 
 juce_generate_juce_header(VstTestPlayground)
