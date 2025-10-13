@@ -2,6 +2,7 @@
 
 #include "PluginProcessor.h"
 #include <juce_gui_extra/juce_gui_extra.h>
+#include "CustomLookAndFeel.h"
 
 class VstTestPlaygroundAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
@@ -15,6 +16,8 @@ public:
 
 private:
     VstTestPlaygroundAudioProcessor& processorRef;
+
+    CustomLookAndFeel customLookAndFeel;
 
     juce::Slider gainSlider;
     juce::Label gainLabel;

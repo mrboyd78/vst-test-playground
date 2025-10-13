@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Params.h"
 
 //==============================================================================
 VstTestPlaygroundAudioProcessor::VstTestPlaygroundAudioProcessor()
@@ -13,7 +14,7 @@ VstTestPlaygroundAudioProcessor::VstTestPlaygroundAudioProcessor()
                          ),
       apvts(*this, nullptr, "Parameters", createParameterLayout())
 {
-    gainParam = apvts.getRawParameterValue("gain");
+    gainParam = apvts.getRawParameterValue(Params::GAIN_ID);
 }
 
 VstTestPlaygroundAudioProcessor::~VstTestPlaygroundAudioProcessor()
@@ -26,7 +27,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout VstTestPlaygroundAudioProces
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(
-        "gain",
+        Params::GAIN_ID,
         "Gain",
         juce::NormalisableRange<float>(-100.0f, 100.0f, 0.01f),
         0.0f));
