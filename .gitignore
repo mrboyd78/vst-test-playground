@@ -42,7 +42,6 @@ cmake-build-*/
 # JUCE
 JuceLibraryCode/
 *.jucer.bak
-JUCE/
 
 # Web GUI
 WebGUI/
