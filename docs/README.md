@@ -4,6 +4,10 @@ Welcome to the VST Test Playground documentation! This guide will help you under
 
 ## 📚 Documentation Structure
 
+### Summary
+
+- **[Technical Debt Resolution](TECHNICAL_DEBT_RESOLUTION.md)** - Complete summary of all improvements made
+
 ### Guides
 
 Step-by-step tutorials and how-to guides for common tasks:
