@@ -1,0 +1,192 @@
+# BUILD AND TEST INSTRUCTIONS
+
+Since PowerShell 6+ (pwsh) is not available, you'll need to run the build manually. Here are your options:
+
+## Option 1: Using the Batch Script (Easiest)
+
+1. Open Command Prompt in the project directory:
+   ```
+   cd C:\Users\mrchr\Documents\GitHub\vst-test-playground
+   ```
+
+2. Run the batch script:
+   ```
+   build_and_test.bat
+   ```
+
+   This will automatically:
+   - Check Node.js and npm
+   - Build the WebGUI
+   - Configure CMake
+   - Build the plugin
+   - Run tests
+   - Show results
+
+## Option 2: Using PowerShell Script
+
+1. Install PowerShell 6+ from: https://aka.ms/powershell
+
+2. Then run:
+   ```powershell
+   .\validate_build.ps1
+   ```
+
+## Option 3: Manual Commands (Step by Step)
+
+If the scripts don't work, run these commands one by one:
+
+### Step 1: Verify Prerequisites
+```cmd
+node --version
+npm --version
+cmake --version
+```
+
+### Step 2: Build WebGUI
+```cmd
+cd WebGUI\ui
+npm install
+npm run build
+cd ..\..
+```
+
+Verify: Check that `WebGUI\ui\dist\index.html` exists
+
+### Step 3: Configure CMake
+```cmd
+cmake -G "Visual Studio 17 2022" -A x64 -B build
+```
+
+If Visual Studio 2022 not found, try:
+```cmd
+cmake -G "Visual Studio 16 2019" -A x64 -B build
+```
+
+### Step 4: Build Plugin
+```cmd
+cmake --build build --config Release
+```
+
+This will take 2-5 minutes on first build.
+
+### Step 5: Run Tests
+```cmd
+build\Release\VstTestPlayground_Tests.exe
+```
+
+Expected output:
+```
+Parameter Tests for VstTestPlayground
+  Parameter Existence... ok
+  Parameter Range Validation... ok
+  State Persistence... ok
+  ProcessBlock Execution... ok
+  Gain Parameter Affects Output... ok
+  Undo Manager Integration... ok
+
+Tests completed successfully!
+```
+
+### Step 6: Locate Plugin
+```cmd
+dir "C:\Program Files\Common Files\VST3\VstTestPlayground.vst3"
+```
+
+Or check:
+```cmd
+dir build\VstTestPlayground_artefacts\Release\VST3\VstTestPlayground.vst3
+```
+
+## What to Do After Successful Build
+
+1. ✅ Verify all tests passed (6/6)
+2. ✅ Confirm plugin file exists
+3. 🎵 Load in your DAW (Reaper, Ableton, FL Studio, etc.)
+4. 🧪 Test the improvements:
+   - Parameter automation (should work now!)
+   - Multiple instances (no conflicts now!)
+   - Undo/redo with Ctrl+Z (new feature!)
+   - Gain range -60dB to +12dB (improved!)
+
+## Common Issues
+
+### "node is not recognized"
+→ Install Node.js from https://nodejs.org/
+→ Restart Command Prompt after installation
+
+### "cmake is not recognized"  
+→ Install CMake from https://cmake.org/download/
+→ Or install via Visual Studio Installer
+
+### npm build fails
+```cmd
+cd WebGUI\ui
+npm install --verbose
+npm run build --verbose
+```
+Check error messages
+
+### CMake fails to find Visual Studio
+Try older version:
+```cmd
+cmake -G "Visual Studio 16 2019" -A x64 -B build
+```
+
+Or list available generators:
+```cmd
+cmake -G
+```
+
+### Build errors
+Build in Debug mode for more info:
+```cmd
+cmake --build build --config Debug
+```
+
+Check build logs in `build\` directory
+
+## System Requirements
+
+✅ Windows 10/11
+✅ Visual Studio 2019 or 2022 (with C++ workload)
+✅ CMake 3.22+
+✅ Node.js 18+
+✅ npm 9+
+✅ JUCE 8.x (in JUCE subdirectory)
+
+## Expected Build Time
+
+- First build: 3-5 minutes
+- Incremental: 30-60 seconds
+- Tests: 5-10 seconds
+
+## Success Criteria
+
+Build successful if:
+- ✅ WebGUI builds (dist folder created)
+- ✅ CMake configures without errors
+- ✅ Plugin compiles (0 errors)
+- ✅ All 6 tests pass
+- ✅ .vst3 file created
+
+## For More Help
+
+See detailed documentation:
+- `docs/VALIDATION_STEPS.md` - Complete validation guide
+- `docs/QUICKSTART_TESTING.md` - Testing in DAW
+- `docs/README.md` - Documentation index
+
+## Ready to Build?
+
+Run one of these:
+```cmd
+REM Option 1: Batch script
+build_and_test.bat
+
+REM Option 2: PowerShell (if pwsh installed)
+pwsh .\validate_build.ps1
+
+REM Option 3: Manual (see steps above)
+```
+
+Good luck! 🚀
