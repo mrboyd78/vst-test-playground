@@ -2,10 +2,6 @@
 #include "PluginEditor.h"
 #include "Params.h"
 
-#ifdef _WIN32
-    #include <windows.h>
-#endif
-
 //==============================================================================
 VstTestPlaygroundAudioProcessorEditor::VstTestPlaygroundAudioProcessorEditor (VstTestPlaygroundAudioProcessor& p)
     : AudioProcessorEditor (&p), processorRef (p)
@@ -19,8 +15,7 @@ VstTestPlaygroundAudioProcessorEditor::VstTestPlaygroundAudioProcessorEditor (Vs
             juce::WebBrowserComponent::Options::WinWebView2{}
                 .withUserDataFolder(
                     juce::File::getSpecialLocation(juce::File::tempDirectory)
-                        .getChildFile("VstTestPlayground_" + 
-                                     juce::String(GetCurrentProcessId()))
+                        .getChildFile("VstTestPlayground")
                 )
         )
         .withNativeIntegrationEnabled()
@@ -29,8 +24,8 @@ VstTestPlaygroundAudioProcessorEditor::VstTestPlaygroundAudioProcessorEditor (Vs
     webView = std::make_unique<WebView>(options);
     addAndMakeVisible(webView.get());
 
-    // Set up WebSliderParameterAttachment for proper DAW automation
-    gainRelay = std::make_unique<juce::WebSliderRelay>(*webView, Params::gain.id);
+    // Set up WebSliderRelay for proper DAW automation
+    gainRelay = std::make_unique<juce::WebSliderRelay>(Params::gain.id);
 
     processorRef.apvts.addParameterListener(Params::gain.id, this);
 
@@ -58,8 +53,7 @@ void VstTestPlaygroundAudioProcessorEditor::resized()
 
 void VstTestPlaygroundAudioProcessorEditor::parameterChanged(const juce::String& parameterID, float newValue)
 {
-    if (parameterID == Params::gain.id)
-    {
-        gainRelay->setSliderValue(newValue);
-    }
+    // Parameter changes are automatically handled by WebSliderRelay
+    // This method can be used for additional UI updates if needed
+    juce::ignoreUnused(parameterID, newValue);
 }

@@ -101,7 +101,8 @@ if(JUCE_BUILD_EXTRAS AND CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         Source/WebView.cpp
         Tests/Main.cpp
         Tests/ParameterTests.cpp
-
+        Tests/UIComponentTests.cpp
+        Tests/IntegrationTests.cpp
     )
 
     target_compile_definitions(VstTestPlayground_Tests PRIVATE

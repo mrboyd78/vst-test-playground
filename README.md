@@ -17,40 +17,41 @@ A production-ready VST3 plugin template using JUCE 8 and CMake. Start building p
 
 ## Prerequisites
 
+**Note:** JUCE 8.0.10 is included as a git submodule - you don't need to download it separately!
+
 ### Windows
 - Visual Studio 2022 (Community or higher) with "Desktop development with C++" workload
 - CMake 3.22 or higher
-- JUCE 8.x
 
 ### macOS
 - Xcode 13 or higher
 - CMake 3.22 or higher
-- JUCE 8.x
 
 ### Linux
 - GCC 9+ or Clang 10+
 - CMake 3.22 or higher
-- JUCE dependencies: `sudo apt-get install libasound2-dev libjack-dev libcurl4-openssl-dev libfreetype6-dev libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libwebkit2gtk-4.0-dev libglu1-mesa-dev mesa-common-dev`
-- JUCE 8.x
+- JUCE dependencies: `sudo apt-get install libasound2-dev libjack-dev libcurl4-openssl-dev libfreetype6-dev libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libwebkit2gtk-4.1-dev libglu1-mesa-dev mesa-common-dev`
 
 ## Quick Start
 
-### 1. Clone or Download JUCE
+### 1. Clone This Repository
 
-Download JUCE 8 from [juce.com](https://juce.com/get-juce/) or clone it:
-
-```bash
-git clone --branch 8.0.10 https://github.com/juce-framework/JUCE.git
-```
-
-### 2. Clone This Template
+Clone the repository with submodules to automatically fetch JUCE:
 
 ```bash
-git clone https://github.com/yourusername/vst3-plugin-template.git
-cd vst3-plugin-template
+git clone --recursive https://github.com/mrboyd78/vst-test-playground.git
+cd vst-test-playground
 ```
 
-### 3. Configure Your Plugin
+If you already cloned without `--recursive`, initialize the submodules:
+
+```bash
+git submodule update --init --recursive
+```
+
+**Note:** JUCE is now managed as a git submodule at version 8.0.10. This keeps the repository clean and makes updates easier.
+
+### 2. Configure Your Plugin
 
 Edit `CMakeLists.txt` and customize these values:
 
@@ -63,7 +64,7 @@ set(PLUGIN_CODE "Plug")
 set(PLUGIN_IS_SYNTH FALSE)            # TRUE for synth, FALSE for effect
 ```
 
-### 4. Build
+### 3. Build
 
 #### Windows (PowerShell)
 
@@ -71,8 +72,8 @@ set(PLUGIN_IS_SYNTH FALSE)            # TRUE for synth, FALSE for effect
 # Initialize Visual Studio environment
 . C:\Users\YourName\build_vst3.ps1
 
-# Configure
-cmake -G "Visual Studio 17 2022" -A x64 -DJUCE_DIR="C:/path/to/JUCE" -B build
+# Configure (JUCE is already available via submodule)
+cmake -G "Visual Studio 17 2022" -A x64 -B build
 
 # Build
 cmake --build build --config Release
@@ -81,14 +82,14 @@ cmake --build build --config Release
 #### macOS/Linux
 
 ```bash
-# Configure
-cmake -DJUCE_DIR=/path/to/JUCE -B build
+# Configure (JUCE is already available via submodule)
+cmake -B build
 
 # Build
 cmake --build build --config Release
 ```
 
-### 5. Find Your Plugin
+### 4. Find Your Plugin
 
 **Windows:** `C:\Program Files\Common Files\VST3\YourPlugin.vst3`
 
