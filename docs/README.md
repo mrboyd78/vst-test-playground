@@ -10,6 +10,7 @@ Step-by-step tutorials and how-to guides for common tasks:
 
 - **[Development Guide](guides/DEVELOPMENT.md)** - Architecture overview and development workflow
 - **[Quick Start Testing](guides/QUICKSTART_TESTING.md)** - Test the plugin after building
+- **[Testing Guide](guides/TESTING.md)** - Comprehensive testing documentation and how to run tests
 - **[User Manual](guides/USER_MANUAL.md)** - Complete guide for plugin users
 - **[Validation Steps](guides/VALIDATION_STEPS.md)** - Manual validation and testing procedures
 - **[JUCE Submodule Management](guides/JUCE_SUBMODULE.md)** - Working with the JUCE dependency

@@ -1,10 +1,12 @@
 #include "WebView.h"
+#ifndef JUCE_UNIT_TESTS
 #include "BinaryData.h"
+#endif
 
 WebView::WebView(const juce::WebBrowserComponent::Options& options)
     : juce::WebBrowserComponent(options)
 {
-#if JUCE_DEBUG
+#if JUCE_DEBUG || JUCE_UNIT_TESTS
     goToURL("http://localhost:3000");
 #else
     int size = 0;
