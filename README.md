@@ -14,6 +14,9 @@ A production-ready VST3 plugin template using JUCE 8 and CMake. Start building p
 - ✅ Cross-platform (Windows, macOS, Linux)
 - ✅ GitHub Actions CI/CD ready
 - ✅ Well-documented code
+- ✅ **GitHub Copilot workflow prompts** for enhanced productivity
+- ✅ **Structured issue templates** for consistent project management
+- ✅ **Ways-of-work documentation** for planning and requirements
 
 ## Prerequisites
 
@@ -212,6 +215,33 @@ This template includes GitHub Actions for automated building on push/PR. See `.g
 - [JUCE Forum](https://forum.juce.com/)
 - [JUCE Tutorials](https://juce.com/learn/tutorials)
 - [The Audio Programmer YouTube](https://www.youtube.com/c/TheAudioProgrammer)
+
+## Workflow Tools
+
+This repository includes GitHub Copilot-powered workflow automation to enhance productivity:
+
+### 🤖 AI-Powered Agents
+
+- **[GitHub Copilot Prompts](.github/copilot-prompts/README.md)** - Automated workflow agents
+  - Create structured GitHub issues from implementation plans
+  - Intelligent Git Flow branch creation
+  - Generate comprehensive PRDs for epics and features
+  - Create test strategies and QA plans
+
+### 📝 Issue Templates
+
+- **[Feature Request](.github/ISSUE_TEMPLATE/feature_request.yml)** - Structured feature proposals
+- **[Bug Report](.github/ISSUE_TEMPLATE/bug_report.yml)** - Detailed bug reports
+- **[Chore Request](.github/ISSUE_TEMPLATE/chore_request.yml)** - Maintenance and refactoring tasks
+
+### 📋 Planning Documentation
+
+- **[Ways of Work](docs/ways-of-work/README.md)** - Structured approach to planning
+  - Epic and feature PRD templates
+  - Implementation planning structure
+  - Test strategy documentation
+
+**Learn More**: See [GitHub Copilot Prompts Documentation](.github/copilot-prompts/README.md) for detailed usage instructions.
 
 ## License
 
