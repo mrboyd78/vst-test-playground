@@ -1,0 +1,107 @@
+name: Chore or Maintenance Task
+description: Propose a chore, maintenance task, or technical improvement
+title: "[Chore]: "
+labels: ["chore", "maintenance"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for non-feature work like refactoring, dependency updates, or technical debt reduction.
+
+  - type: input
+    id: task-name
+    attributes:
+      label: Task Name
+      description: A clear, concise name for the chore or maintenance task
+      placeholder: e.g., "Refactor audio buffer management"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What type of maintenance task is this?
+      options:
+        - Refactoring
+        - Dependency Update
+        - Technical Debt
+        - Code Quality
+        - Performance Optimization
+        - Build System
+        - CI/CD
+        - Documentation
+        - Testing
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Describe what needs to be done and why
+      placeholder: Explain the maintenance task and its importance
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why should this work be done?
+      placeholder: |
+        What benefit will this provide?
+        What problems does it solve or prevent?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope of Work
+      description: What files, components, or systems will be affected?
+      placeholder: |
+        List the main areas that will be changed:
+        - Component A
+        - Component B
+        - Related tests
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be true for this task to be considered complete?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] All tests pass
+        - [ ] No regression in existing functionality
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: How urgent is this task?
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks and Considerations
+      description: What are the potential risks or things to watch out for?
+      placeholder: List any risks, breaking changes, or important considerations
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context, links to documentation, or related issues

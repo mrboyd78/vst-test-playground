@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: GitHub Discussions
+    url: https://github.com/mrboyd78/vst-test-playground/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: JUCE Forum
+    url: https://forum.juce.com/
+    about: Get help with JUCE framework questions
+  - name: VST3 Documentation
+    url: https://steinbergmedia.github.io/vst3_doc/
+    about: Learn more about the VST3 SDK

@@ -8,6 +8,13 @@ Welcome to the VST Test Playground documentation! This guide will help you under
 
 - **[Technical Debt Resolution](TECHNICAL_DEBT_RESOLUTION.md)** - Complete summary of all improvements made
 
+### Workflow & Automation
+
+Tools and prompts to enhance your development workflow:
+
+- **[GitHub Copilot Prompts](../.github/copilot-prompts/README.md)** - AI-powered workflow automation agents
+- **[Issue Templates](../.github/ISSUE_TEMPLATE/)** - Structured templates for features, bugs, and chores
+
 ### Guides
 
 Step-by-step tutorials and how-to guides for common tasks:
@@ -48,6 +55,25 @@ New to the project? Start here:
 ### Building the Project
 
 See the main [README.md](../README.md) for platform-specific build instructions.
+
+### Using GitHub Copilot Workflow Prompts
+
+The project includes AI-powered workflow agents to enhance productivity:
+
+- **Create Issues from Plans**: Automatically generate structured GitHub issues from implementation plans
+- **Smart Branch Creation**: Analyze changes and create appropriate Git Flow branches
+- **Generate PRDs**: Create comprehensive Product Requirements Documents for epics and features
+- **Test Planning**: Generate test strategies and QA plans
+
+See [GitHub Copilot Prompts](../.github/copilot-prompts/README.md) for detailed usage instructions.
+
+### Creating Issues
+
+Use structured issue templates for consistent reporting:
+
+- **[Feature Request](../.github/ISSUE_TEMPLATE/feature_request.yml)**: Propose new features or enhancements
+- **[Bug Report](../.github/ISSUE_TEMPLATE/bug_report.yml)**: Report bugs or issues
+- **[Chore Request](../.github/ISSUE_TEMPLATE/chore_request.yml)**: Request maintenance or refactoring work
 
 ### Adding New Parameters
 
