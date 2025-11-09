@@ -1,0 +1,47 @@
+{
+  "id": "task-2025-11-09-001",
+  "title": "Add comprehensive logging to plugin audio processor",
+  "description": "Implement structured logging throughout the audio processing pipeline to aid in debugging and performance monitoring. Logs should include parameter changes, buffer processing metrics, and error conditions without impacting real-time performance.",
+  "type": "feature",
+  "priority": "medium",
+  "estimatedHours": 8,
+  "dependencies": [],
+  "acceptanceCriteria": [
+    "Logger implementation uses lock-free queue for real-time thread safety",
+    "Log levels (DEBUG, INFO, WARN, ERROR) are configurable at runtime",
+    "Performance overhead is < 0.1% in release builds",
+    "Logs include timestamps, thread IDs, and parameter states",
+    "Log output can be directed to file or console via configuration",
+    "Unit tests verify logging doesn't cause audio dropouts"
+  ],
+  "technicalNotes": "Use JUCE's Logger class as the foundation. Implement a circular buffer for log messages from the audio thread. Flush logs on the message thread. Consider using std::atomic for configuration flags. Reference: JUCE best practices for real-time logging.",
+  "relatedDocuments": [
+    {
+      "type": "reference",
+      "path": "docs/reference/REFERENCE.md",
+      "reason": "Contains JUCE framework patterns and best practices"
+    },
+    {
+      "type": "guide",
+      "path": "docs/guides/DEVELOPMENT.md",
+      "reason": "Development workflow and testing procedures"
+    }
+  ],
+  "tags": [
+    "audio",
+    "logging",
+    "diagnostics",
+    "performance"
+  ],
+  "assignee": "audio-team",
+  "milestone": "v1.1.0",
+  "status": "ready",
+  "createdAt": "2025-11-09T10:00:00.000Z",
+  "updatedAt": "2025-11-09T10:00:00.000Z",
+  "metadata": {
+    "source": "Technical debt review",
+    "links": {
+      "github": "https://github.com/mrboyd78/vst-test-playground/issues/42"
+    }
+  }
+}

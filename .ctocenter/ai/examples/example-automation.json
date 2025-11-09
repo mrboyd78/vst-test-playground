@@ -1,0 +1,160 @@
+{
+  "id": "automation-2025-11-09-001",
+  "title": "Automated VST3 plugin validation and deployment",
+  "trigger": "manual",
+  "severity": "medium",
+  "environment": "staging",
+  "runbook": ".ctocenter/runbooks/plugin-deployment.md",
+  "steps": [
+    {
+      "id": "step-001",
+      "name": "Verify build artifacts exist",
+      "type": "check",
+      "action": "test -f build/VstTestPlayground_artefacts/Release/VST3/VstTestPlayground.vst3 && echo 'VST3 artifact found'",
+      "validation": "File exists and is a valid VST3 bundle",
+      "timeout": 10,
+      "retryable": false,
+      "maxRetries": 0,
+      "onFailure": "abort",
+      "requires": ["BUILD_DIR"]
+    },
+    {
+      "id": "step-002",
+      "name": "Run plugin validator",
+      "type": "command",
+      "action": "pluginval --strictness-level 5 --validate build/VstTestPlayground_artefacts/Release/VST3/VstTestPlayground.vst3",
+      "validation": "Exit code 0 with no validation errors",
+      "timeout": 120,
+      "retryable": false,
+      "maxRetries": 0,
+      "onFailure": "abort",
+      "requires": ["PLUGINVAL_PATH"]
+    },
+    {
+      "id": "step-003",
+      "name": "Run automated audio tests",
+      "type": "command",
+      "action": "cd build && ctest --output-on-failure -C Release",
+      "validation": "All tests pass with 100% success rate",
+      "timeout": 300,
+      "retryable": true,
+      "maxRetries": 2,
+      "retryDelay": 10,
+      "onFailure": "abort"
+    },
+    {
+      "id": "step-004",
+      "name": "Create deployment backup",
+      "type": "command",
+      "action": "tar -czf /tmp/vst3-backup-$(date +%Y%m%d-%H%M%S).tar.gz -C ~/Library/Audio/Plug-Ins/VST3 VstTestPlayground.vst3 2>/dev/null || echo 'No existing plugin to backup'",
+      "validation": "Backup created or no previous version exists",
+      "timeout": 30,
+      "retryable": false,
+      "maxRetries": 0,
+      "onFailure": "continue"
+    },
+    {
+      "id": "step-005",
+      "name": "Deploy plugin to staging location",
+      "type": "command",
+      "action": "cp -R build/VstTestPlayground_artefacts/Release/VST3/VstTestPlayground.vst3 ~/Library/Audio/Plug-Ins/VST3/",
+      "validation": "Plugin copied successfully and is accessible",
+      "timeout": 30,
+      "retryable": true,
+      "maxRetries": 3,
+      "retryDelay": 5,
+      "onFailure": "rollback"
+    },
+    {
+      "id": "step-006",
+      "name": "Verify plugin loads in DAW",
+      "type": "check",
+      "action": "osascript -e 'tell application \"Reaper\" to activate' && sleep 5 && osascript -e 'tell application \"System Events\" to keystroke \"r\" using command down'",
+      "validation": "DAW starts and plugin scan completes without errors",
+      "timeout": 60,
+      "retryable": true,
+      "maxRetries": 2,
+      "retryDelay": 10,
+      "onFailure": "rollback",
+      "requires": ["DAW_INSTALLED"]
+    },
+    {
+      "id": "step-007",
+      "name": "Run smoke tests",
+      "type": "check",
+      "action": "./scripts/smoke-test-plugin.sh VstTestPlayground",
+      "validation": "Plugin responds to parameter changes and produces audio output",
+      "timeout": 120,
+      "retryable": false,
+      "maxRetries": 0,
+      "onFailure": "rollback"
+    }
+  ],
+  "rollback": [
+    {
+      "id": "rollback-001",
+      "name": "Remove deployed plugin",
+      "action": "rm -rf ~/Library/Audio/Plug-Ins/VST3/VstTestPlayground.vst3",
+      "validation": "Plugin removed from staging location",
+      "timeout": 30
+    },
+    {
+      "id": "rollback-002",
+      "name": "Restore previous version if backup exists",
+      "action": "LATEST_BACKUP=$(ls -t /tmp/vst3-backup-*.tar.gz 2>/dev/null | head -n 1); if [ -n \"$LATEST_BACKUP\" ]; then tar -xzf \"$LATEST_BACKUP\" -C ~/Library/Audio/Plug-Ins/VST3/; echo 'Restored from backup'; else echo 'No backup to restore'; fi",
+      "validation": "Previous version restored or confirmed no backup existed",
+      "timeout": 60
+    }
+  ],
+  "validation": {
+    "checks": [
+      "Plugin file exists at deployment location",
+      "Plugin passes validator with no errors",
+      "All unit tests pass",
+      "Plugin loads in at least one DAW",
+      "Smoke tests complete successfully"
+    ],
+    "successCriteria": [
+      "VST3 plugin is deployed to staging location",
+      "Plugin validates without errors (pluginval strictness 5)",
+      "All automated tests pass (100% success rate)",
+      "Plugin loads and responds to parameter changes in DAW",
+      "No audio dropouts or errors during smoke test"
+    ]
+  },
+  "notifications": {
+    "onStart": [
+      "slack://dev-team-channel"
+    ],
+    "onSuccess": [
+      "slack://dev-team-channel",
+      "email://qa-team@example.com"
+    ],
+    "onFailure": [
+      "slack://dev-team-channel",
+      "pagerduty://audio-team"
+    ],
+    "onRollback": [
+      "slack://dev-team-channel",
+      "email://lead-dev@example.com"
+    ]
+  },
+  "metadata": {
+    "createdAt": "2025-11-09T10:00:00.000Z",
+    "author": "automation-system",
+    "lastTested": "2025-11-09T09:30:00.000Z",
+    "executionCount": 0,
+    "estimatedDuration": 540,
+    "tags": [
+      "deployment",
+      "vst3",
+      "audio-plugin",
+      "validation"
+    ],
+    "requiredPermissions": [
+      "filesystem:write",
+      "process:execute"
+    ],
+    "safetyNotes": "This automation modifies the VST3 plugins directory. Always create backups before deployment. Test in staging before production. Ensure no DAW sessions are actively using the plugin during deployment."
+  }
+}
