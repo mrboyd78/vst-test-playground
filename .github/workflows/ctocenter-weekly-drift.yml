@@ -1,0 +1,149 @@
+name: CTO Center Weekly Drift Check
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  weekly-drift-scan:
+    runs-on: ubuntu-latest
+    name: Weekly Documentation Drift Scan
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install TypeScript
+        run: npm install -g typescript ts-node @types/node
+      
+      - name: Run drift scan
+        id: drift-scan
+        run: |
+          cd .ctocenter/scripts
+          ts-node docs-scan.ts || true
+      
+      - name: Upload drift report
+        uses: actions/upload-artifact@v4
+        with:
+          name: weekly-drift-report-${{ github.run_number }}
+          path: .ctocenter/state/drift-report.json
+          retention-days: 90
+      
+      - name: Read drift report
+        id: read-report
+        run: |
+          if [ -f .ctocenter/state/drift-report.json ]; then
+            DRIFT=$(jq -r '.hasDrift' .ctocenter/state/drift-report.json)
+            TOTAL=$(jq -r '.summary.total' .ctocenter/state/drift-report.json)
+            CRITICAL=$(jq -r '.summary.critical' .ctocenter/state/drift-report.json)
+            HIGH=$(jq -r '.summary.high' .ctocenter/state/drift-report.json)
+            
+            echo "has_drift=$DRIFT" >> $GITHUB_OUTPUT
+            echo "total=$TOTAL" >> $GITHUB_OUTPUT
+            echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+            echo "high=$HIGH" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create GitHub issue for drift
+        if: steps.read-report.outputs.has_drift == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = '.ctocenter/state/drift-report.json';
+            const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+            
+            let body = `## 📊 Weekly Documentation Drift Report\n\n`;
+            body += `**Date:** ${new Date(report.timestamp).toLocaleDateString()}\n\n`;
+            body += `### Summary\n\n`;
+            body += `| Severity | Count |\n`;
+            body += `|----------|-------|\n`;
+            body += `| Critical | ${report.summary.critical} |\n`;
+            body += `| High | ${report.summary.high} |\n`;
+            body += `| Medium | ${report.summary.medium} |\n`;
+            body += `| Low | ${report.summary.low} |\n`;
+            body += `| **Total** | **${report.summary.total}** |\n\n`;
+            
+            body += `### Top Issues\n\n`;
+            
+            const criticalIssues = report.issues.filter(i => i.severity === 'critical');
+            const highIssues = report.issues.filter(i => i.severity === 'high');
+            
+            if (criticalIssues.length > 0) {
+              body += `#### 🔴 Critical Issues\n\n`;
+              for (const issue of criticalIssues) {
+                body += `- **${issue.type}**: ${issue.description}\n`;
+                if (issue.file) body += `  - File: \`${issue.file}\`\n`;
+                body += `  - Recommendation: ${issue.recommendation}\n\n`;
+              }
+            }
+            
+            if (highIssues.length > 0) {
+              body += `#### 🟠 High Priority Issues\n\n`;
+              for (const issue of highIssues.slice(0, 5)) {
+                body += `- **${issue.type}**: ${issue.description}\n`;
+                if (issue.file) body += `  - File: \`${issue.file}\`\n`;
+                body += `  - Recommendation: ${issue.recommendation}\n\n`;
+              }
+              if (highIssues.length > 5) {
+                body += `\n_... and ${highIssues.length - 5} more high priority issues._\n\n`;
+              }
+            }
+            
+            body += `### Next Steps\n\n`;
+            body += `- [ ] Review drift report\n`;
+            body += `- [ ] Update affected documentation\n`;
+            body += `- [ ] Create ADRs for architectural decisions\n`;
+            body += `- [ ] Update project map if structure changed\n`;
+            body += `- [ ] Close this issue once drift is resolved\n\n`;
+            
+            body += `### Resources\n\n`;
+            body += `- [CTO Command Center Usage Guide](./docs/cto/USAGE.md)\n`;
+            body += `- [Drift Report Artifact](../../actions/runs/${context.runId})\n`;
+            
+            // Check if similar issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'documentation,drift'
+            });
+            
+            if (issues.data.length === 0) {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `📊 Weekly Documentation Drift Report - ${new Date().toISOString().split('T')[0]}`,
+                body: body,
+                labels: ['documentation', 'drift', 'automated']
+              });
+              console.log('Created new drift issue');
+            } else {
+              // Update existing issue
+              const existingIssue = issues.data[0];
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `## Updated Drift Report - ${new Date().toISOString().split('T')[0]}\n\n${body}`
+              });
+              console.log(`Updated existing issue #${existingIssue.number}`);
+            }
+      
+      - name: Send summary
+        run: |
+          echo "📊 Weekly drift scan complete"
+          echo "Has drift: ${{ steps.read-report.outputs.has_drift }}"
+          echo "Total issues: ${{ steps.read-report.outputs.total }}"
+          echo "Critical: ${{ steps.read-report.outputs.critical }}"
+          echo "High: ${{ steps.read-report.outputs.high }}"
