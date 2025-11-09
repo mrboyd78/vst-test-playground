@@ -1,0 +1,67 @@
+# CODEOWNERS - Define code ownership for automated review requests
+# 
+# This file defines individuals or teams responsible for code in this repository.
+# When a PR modifies files matching these patterns, the designated owners are
+# automatically requested as reviewers.
+#
+# Format: <file-pattern> @username @org/team-name
+# 
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repo
+# These owners will be requested for review unless a later match takes precedence
+* @mrboyd78
+
+# CTO Command Center
+.ctocenter/ @mrboyd78
+docs/cto/ @mrboyd78
+
+# Architecture Decision Records - Require explicit review
+.ctocenter/adrs/ @mrboyd78
+.ctocenter/templates/ @mrboyd78
+
+# Core documentation - Require review for changes
+README.md @mrboyd78
+docs/ @mrboyd78
+
+# Ways of Work documentation
+docs/ways-of-work/ @mrboyd78
+
+# Source code - Audio processing
+Source/PluginProcessor.cpp @mrboyd78
+Source/PluginProcessor.h @mrboyd78
+
+# Source code - UI/Editor
+Source/PluginEditor.cpp @mrboyd78
+Source/PluginEditor.h @mrboyd78
+
+# Source code - WebView integration
+Source/WebView.cpp @mrboyd78
+Source/WebView.h @mrboyd78
+
+# Build system
+CMakeLists.txt @mrboyd78
+build_and_test.py @mrboyd78
+
+# CI/CD workflows
+.github/workflows/ @mrboyd78
+
+# Tests - Require review to ensure quality
+Tests/ @mrboyd78
+
+# Issue templates
+.github/ISSUE_TEMPLATE/ @mrboyd78
+
+# GitHub Copilot prompts
+.github/copilot-prompts/ @mrboyd78
+
+# CTO Command Center scripts - Critical automation
+.ctocenter/scripts/ @mrboyd78
+
+# Playbooks and Runbooks - Operational procedures
+.ctocenter/playbooks/ @mrboyd78
+.ctocenter/runbooks/ @mrboyd78
+
+# Release artifacts
+CHANGELOG.md @mrboyd78
+docs/releases/ @mrboyd78

@@ -1,0 +1,235 @@
+name: CTO Center Validation
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'docs/**'
+      - '.ctocenter/**'
+      - 'Source/**'
+      - 'README.md'
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate-documentation:
+    runs-on: ubuntu-latest
+    name: Validate Documentation Alignment
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install TypeScript
+        run: npm install -g typescript ts-node @types/node
+      
+      - name: Run documentation drift scan
+        id: drift-scan
+        run: |
+          cd .ctocenter/scripts
+          ts-node docs-scan.ts
+        continue-on-error: true
+      
+      - name: Upload drift report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift-report
+          path: .ctocenter/state/drift-report.json
+          retention-days: 30
+      
+      - name: Comment on PR with drift report
+        if: github.event_name == 'pull_request' && steps.drift-scan.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = '.ctocenter/state/drift-report.json';
+            
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              let comment = '## ⚠️ Documentation Drift Detected\n\n';
+              comment += `**Summary:** ${report.summary.total} issue(s) found\n\n`;
+              comment += `| Severity | Count |\n`;
+              comment += `|----------|-------|\n`;
+              comment += `| Critical | ${report.summary.critical} |\n`;
+              comment += `| High | ${report.summary.high} |\n`;
+              comment += `| Medium | ${report.summary.medium} |\n`;
+              comment += `| Low | ${report.summary.low} |\n\n`;
+              
+              if (report.issues.length > 0) {
+                comment += '### Issues:\n\n';
+                for (const issue of report.issues.slice(0, 5)) {
+                  comment += `- **[${issue.severity}]** ${issue.description}\n`;
+                  if (issue.file) {
+                    comment += `  - File: \`${issue.file}\`\n`;
+                  }
+                  comment += `  - ${issue.recommendation}\n\n`;
+                }
+                if (report.issues.length > 5) {
+                  comment += `\n_... and ${report.issues.length - 5} more issues. See the full report in artifacts._\n`;
+                }
+              }
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+      
+      - name: Fail if critical/high drift detected
+        if: steps.drift-scan.outcome == 'failure'
+        run: |
+          echo "❌ Documentation drift detected with critical or high severity issues"
+          exit 1
+
+  validate-adrs:
+    runs-on: ubuntu-latest
+    name: Validate ADRs
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install TypeScript
+        run: npm install -g typescript ts-node @types/node
+      
+      - name: Validate ADRs
+        id: adr-validate
+        run: |
+          cd .ctocenter/scripts
+          ts-node adr-validate.ts
+        continue-on-error: true
+      
+      - name: Upload ADR validation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adr-validation-report
+          path: .ctocenter/state/adr-validation.json
+          retention-days: 30
+      
+      - name: Comment on PR with ADR issues
+        if: github.event_name == 'pull_request' && steps.adr-validate.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = '.ctocenter/state/adr-validation.json';
+            
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              let comment = '## ❌ ADR Validation Failed\n\n';
+              comment += `Found ${report.issues.length} issue(s) in Architecture Decision Records.\n\n`;
+              
+              if (report.issues.length > 0) {
+                comment += '### Issues:\n\n';
+                for (const issue of report.issues) {
+                  const icon = issue.severity === 'error' ? '❌' : '⚠️';
+                  comment += `${icon} **${issue.file}**: ${issue.message}\n`;
+                }
+              }
+              
+              comment += '\n---\n';
+              comment += 'Please fix these issues before merging. See [ADR Guidelines](../../docs/cto/USAGE.md#adrs) for more information.\n';
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+      
+      - name: Fail if ADR validation failed
+        if: steps.adr-validate.outcome == 'failure'
+        run: |
+          echo "❌ ADR validation failed"
+          exit 1
+
+  check-toc:
+    runs-on: ubuntu-latest
+    name: Check Table of Contents
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install TypeScript
+        run: npm install -g typescript ts-node @types/node
+      
+      - name: Check TOC synchronization
+        run: |
+          cd .ctocenter/scripts
+          ts-node toc-sync.ts --all
+      
+      - name: Check for changes
+        id: verify-no-changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "TOC files are out of sync!"
+            git diff
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "All TOC files are up to date"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Comment on PR if TOC needs update
+        if: github.event_name == 'pull_request' && steps.verify-no-changes.outputs.changed == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## 📚 Table of Contents Update Needed
+            
+            Some markdown files have outdated or missing table of contents.
+            
+            To fix this, run:
+            \`\`\`bash
+            cd .ctocenter/scripts
+            ts-node toc-sync.ts --all
+            git add .
+            git commit -m "Update table of contents"
+            \`\`\`
+            
+            Or add the TOC markers manually:
+            \`\`\`markdown
+            <!-- TOC -->
+            <!-- /TOC -->
+            \`\`\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+      
+      - name: Fail if TOC out of sync
+        if: steps.verify-no-changes.outputs.changed == 'true'
+        run: |
+          echo "❌ Table of contents files are out of sync"
+          exit 1
