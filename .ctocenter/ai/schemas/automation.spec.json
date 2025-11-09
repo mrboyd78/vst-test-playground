@@ -1,0 +1,264 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ctocenter.dev/schemas/automation.spec.json",
+  "title": "Automation Specification",
+  "description": "Schema for automated runbook execution workflows",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "trigger",
+    "severity",
+    "environment",
+    "steps",
+    "rollback",
+    "validation"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^automation-[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{3}$",
+      "description": "Unique automation identifier",
+      "examples": ["automation-2025-11-09-001"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 100,
+      "description": "Clear description of what this automation does"
+    },
+    "trigger": {
+      "type": "string",
+      "description": "What initiates this automation",
+      "examples": ["manual", "alert:cpu-high", "schedule:daily", "webhook:deploy"]
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Severity level of the incident or operation"
+    },
+    "environment": {
+      "type": "string",
+      "enum": ["production", "staging", "development", "all"],
+      "description": "Target environment"
+    },
+    "runbook": {
+      "type": "string",
+      "description": "Path to related runbook document"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "type", "action", "validation", "timeout", "onFailure"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^step-[0-9]{3}$",
+            "description": "Step identifier (step-001, step-002, etc.)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 10,
+            "description": "Human-readable step description"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["command", "check", "wait", "notify", "approval"],
+            "description": "Type of step"
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Command, query, or action to execute"
+          },
+          "validation": {
+            "type": "string",
+            "minLength": 5,
+            "description": "How to verify this step succeeded"
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600,
+            "description": "Maximum seconds to wait for completion"
+          },
+          "retryable": {
+            "type": "boolean",
+            "description": "Whether this step can be retried on failure",
+            "default": false
+          },
+          "maxRetries": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Maximum retry attempts",
+            "default": 0
+          },
+          "retryDelay": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Seconds to wait between retries",
+            "default": 5
+          },
+          "onFailure": {
+            "type": "string",
+            "enum": ["continue", "abort", "rollback"],
+            "description": "Action to take if step fails"
+          },
+          "requires": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Environment variables or permissions required"
+          }
+        }
+      }
+    },
+    "rollback": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "action", "validation"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^rollback-[0-9]{3}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 10
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validation": {
+            "type": "string",
+            "minLength": 5
+          },
+          "timeout": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600,
+            "default": 300
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": ["checks", "successCriteria"],
+      "properties": {
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 10
+          },
+          "minItems": 1,
+          "description": "Final validation checks to run"
+        },
+        "successCriteria": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 10
+          },
+          "minItems": 1,
+          "description": "Measurable success criteria"
+        }
+      }
+    },
+    "notifications": {
+      "type": "object",
+      "properties": {
+        "onStart": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Channels to notify when automation starts"
+        },
+        "onSuccess": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Channels to notify on success"
+        },
+        "onFailure": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Channels to notify on failure"
+        },
+        "onRollback": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Channels to notify on rollback"
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["createdAt", "author"],
+      "properties": {
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "author": {
+          "type": "string"
+        },
+        "lastTested": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "lastExecuted": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "executionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 0
+        },
+        "successRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Success rate (0.0 - 1.0)"
+        },
+        "estimatedDuration": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Estimated duration in seconds"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          }
+        },
+        "requiredPermissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Permissions required to execute"
+        },
+        "safetyNotes": {
+          "type": "string",
+          "description": "Important safety considerations"
+        }
+      }
+    }
+  }
+}
