@@ -1,0 +1,34 @@
+{
+  "timestamp": "2025-11-09T10:00:41.350Z",
+  "hasDrift": true,
+  "issues": [
+    {
+      "type": "missing_doc",
+      "severity": "medium",
+      "file": "docs/reference/PluginProcessor.md",
+      "description": "Core component PluginProcessor exists but lacks reference documentation",
+      "recommendation": "Create reference documentation for PluginProcessor in docs/reference/"
+    },
+    {
+      "type": "missing_doc",
+      "severity": "medium",
+      "file": "docs/reference/PluginEditor.md",
+      "description": "Core component PluginEditor exists but lacks reference documentation",
+      "recommendation": "Create reference documentation for PluginEditor in docs/reference/"
+    },
+    {
+      "type": "missing_doc",
+      "severity": "medium",
+      "file": "docs/reference/WebView.md",
+      "description": "Core component WebView exists but lacks reference documentation",
+      "recommendation": "Create reference documentation for WebView in docs/reference/"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "critical": 0,
+    "high": 0,
+    "medium": 3,
+    "low": 0
+  }
+}
